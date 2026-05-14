@@ -1,0 +1,16 @@
+{
+  "name": "AI Interview Assistant",
+  "short_name": "AI Interview",
+  "description": "Master your next tech interview with AI-powered mock interviews",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#000000",
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
