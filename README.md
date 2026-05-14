@@ -164,6 +164,41 @@ cd frontend
 npm run dev
 ```
 
+## Deployment
+
+### Frontend (Vercel)
+
+1. Open Vercel and import your GitHub repository.
+2. Set the root directory to `frontend`.
+3. Use:
+   - Build command: `npm run build`
+   - Output directory: `dist`
+4. Add an environment variable for the backend URL:
+   - `VITE_API_URL=https://<your-backend-url>`
+   - Example: `https://my-ai-backend.onrender.com`
+5. Deploy the project.
+
+### Backend (Railway / Render / Heroku)
+
+1. Create a new Node.js service on your platform.
+2. Connect the GitHub repository and point it to the `backend` folder.
+3. Set the build command to `npm install` and the start command to `npm start`.
+4. Add required environment variables:
+   - `PORT` (e.g. `5000`)
+   - `MONGODB_URI`
+   - `JWT_SECRET`
+   - `JWT_EXPIRE=7d`
+   - `OPENROUTER_API_KEY`
+   - `GEMINI_API_KEY` (optional)
+   - `CORS_ORIGINS` (comma-separated frontend URL(s), e.g. `https://your-app.vercel.app`)
+   - `NODE_ENV=production`
+5. Deploy the backend.
+
+### Connect frontend to backend
+
+- Once the backend is deployed, update the frontend API base URL if needed.
+- If the frontend is using a proxy in development, add the deployed backend URL in production.
+
 ## Future Improvements
 
 - add production build and deployment scripts
