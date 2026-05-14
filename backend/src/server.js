@@ -73,6 +73,11 @@ app.use('/api/interview', interviewRoutes);
 app.use('/api/resume', resumeRoutes);
 app.use('/api/user', userRoutes);
 
+// Root route for deployment health and quick check
+app.get('/', (req, res) => {
+  res.send('AI Interview PrepAI backend is running. Use /health for status and /api/* for API routes.');
+});
+
 // Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
