@@ -46,10 +46,10 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, isMobile }) => {
     : `fixed z-40 top-0 left-0 h-full transition-all duration-300 ${sidebarWidth}`;
 
   return (
-    <aside className={`${mobileClass} bg-zinc-950 border-r border-zinc-800 flex flex-col`}>
+    <aside className={`${mobileClass} app-sidebar flex flex-col`}>
       
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-zinc-800 h-16 flex-shrink-0">
+      <div className="sidebar-header flex items-center justify-between p-4 h-16 flex-shrink-0">
         {(sidebarOpen || isMobile) ? (
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -69,14 +69,14 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, isMobile }) => {
         {isMobile ? (
           <button
             onClick={() => setSidebarOpen(false)}
-            className="p-1 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800"
+            className="sidebar-icon-btn p-1 rounded-lg"
           >
             <FiX size={20} />
           </button>
         ) : (
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-1 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800"
+            className="sidebar-icon-btn p-1 rounded-lg"
           >
             {sidebarOpen ? <FiChevronLeft size={18} /> : <FiChevronRight size={18} />}
           </button>
@@ -93,8 +93,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, isMobile }) => {
             className={({ isActive }) => `
               flex items-center px-3 py-2.5 mx-2 mb-1 rounded-xl transition-all duration-200
               ${isActive
-                ? 'bg-purple-600/20 text-purple-400 border border-purple-500/30'
-                : 'text-zinc-400 hover:text-white hover:bg-zinc-800/70'
+                ? 'sidebar-nav-active'
+                : 'sidebar-nav-item'
               }
               ${(!sidebarOpen && !isMobile) ? 'justify-center' : ''}
             `}
@@ -108,16 +108,16 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, isMobile }) => {
       </nav>
 
       {/* User & Logout */}
-      <div className="p-3 border-t border-zinc-800 flex-shrink-0">
+      <div className="sidebar-footer p-3 flex-shrink-0">
         {(sidebarOpen || isMobile) && user && (
-          <div className="mb-2 px-3 py-2 bg-zinc-900 rounded-xl">
+          <div className="sidebar-user mb-2 px-3 py-2 rounded-xl">
             <p className="text-sm font-medium text-white truncate">{user.name}</p>
             <p className="text-xs text-zinc-500 truncate">{user.email}</p>
           </div>
         )}
         <button
           onClick={handleLogout}
-          className={`flex items-center w-full px-3 py-2 rounded-xl text-red-400 hover:bg-red-500/10 transition-all duration-200 ${
+          className={`sidebar-logout flex items-center w-full px-3 py-2 rounded-xl transition-all duration-200 ${
             (!sidebarOpen && !isMobile) ? 'justify-center' : 'justify-start'
           }`}
         >

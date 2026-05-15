@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
 import PrivateRoute from './components/PrivateRoute';
 import Layout from './components/Layout';
@@ -18,7 +19,8 @@ import SettingsPage from './pages/SettingsPage';
 
 function App() {
   return (
-    <AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
       <Toaster 
         position="top-right"
         toastOptions={{
@@ -48,6 +50,7 @@ function App() {
         </Route>
       </Routes>
     </AuthProvider>
+    </ThemeProvider>
   );
 }
 
