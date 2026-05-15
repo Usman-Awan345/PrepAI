@@ -21,6 +21,7 @@ const ResumeAnalyzerPage = () => {
   const [uploading, setUploading] = useState(false);
   const [analysis, setAnalysis] = useState(null);
   const [dragActive, setDragActive] = useState(false);
+  const [targetRole, setTargetRole] = useState('MERN Stack Developer');
 
   const handleDrag = (e) => {
     e.preventDefault();
@@ -38,19 +39,19 @@ const ResumeAnalyzerPage = () => {
     setDragActive(false);
     
     const droppedFile = e.dataTransfer.files[0];
-    if (droppedFile && droppedFile.type === 'application/pdf') {
+    if (droppedFile && droppedFile.type === 'application/pdf' && droppedFile.size <= 5 * 1024 * 1024) {
       setFile(droppedFile);
     } else {
-      toast.error('Please upload a PDF file');
+      toast.error('Please upload a PDF file under 5MB');
     }
   };
 
   const handleFileSelect = (e) => {
     const selectedFile = e.target.files[0];
-    if (selectedFile && selectedFile.type === 'application/pdf') {
+    if (selectedFile && selectedFile.type === 'application/pdf' && selectedFile.size <= 5 * 1024 * 1024) {
       setFile(selectedFile);
     } else {
-      toast.error('Please upload a PDF file');
+      toast.error('Please upload a PDF file under 5MB');
     }
   };
 
@@ -62,16 +63,20 @@ const ResumeAnalyzerPage = () => {
 
     const formData = new FormData();
     formData.append('resume', file);
+    formData.append('targetRole', targetRole);
+    formData.append('analysisDepth', 'fast');
+    formData.append('responseMode', 'summary-first');
 
     setUploading(true);
     try {
       const response = await api.post('/resume/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+        headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 45000
       });
       setAnalysis(response.data.analysis);
       toast.success('Resume analyzed successfully!');
     } catch (error) {
-      toast.error('Failed to analyze resume');
+      toast.error(error.code === 'ECONNABORTED' ? 'Resume analysis timed out. Please upload a smaller PDF.' : 'Failed to analyze resume');
       console.error(error);
     } finally {
       setUploading(false);
@@ -83,6 +88,15 @@ const ResumeAnalyzerPage = () => {
     if (score >= 60) return 'text-yellow-400';
     return 'text-red-400';
   };
+
+  const safeList = (value) => Array.isArray(value) ? value : [];
+  const atsScore = Number(analysis?.atsScore || 0);
+  const scoreLabel = atsScore >= 80 ? 'Excellent' : atsScore >= 60 ? 'Good' : 'Needs Work';
+  const priorityFixes = [
+    ...safeList(analysis?.weakAreas).slice(0, 2),
+    ...safeList(analysis?.grammarIssues).slice(0, 1),
+    ...safeList(analysis?.suggestions).slice(0, 2),
+  ].filter(Boolean).slice(0, 5);
 
   if (analysis) {
     return (
@@ -109,25 +123,51 @@ const ResumeAnalyzerPage = () => {
           <div className="glass-card p-6 mb-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold">ATS Compatibility Score</h2>
-              <div className={`text-4xl font-bold ${getScoreColor(analysis.atsScore)}`}>
-                {analysis.atsScore}/100
+              <div className={`text-4xl font-bold ${getScoreColor(atsScore)}`}>
+                {atsScore}/100
               </div>
             </div>
             <div className="w-full bg-zinc-700 rounded-full h-3">
               <div 
                 className={`h-3 rounded-full transition-all duration-1000 ${
-                  analysis.atsScore >= 80 ? 'bg-green-500' :
-                  analysis.atsScore >= 60 ? 'bg-yellow-500' : 'bg-red-500'
+                  atsScore >= 80 ? 'bg-green-500' :
+                  atsScore >= 60 ? 'bg-yellow-500' : 'bg-red-500'
                 }`}
-                style={{ width: `${analysis.atsScore}%` }}
+                style={{ width: `${Math.min(atsScore, 100)}%` }}
               ></div>
             </div>
             <p className="text-sm text-zinc-400 mt-3">
-              {analysis.atsScore >= 80 ? 'Excellent! Your resume is well-optimized.' :
-               analysis.atsScore >= 60 ? "Good, but there's room for improvement." :
+              {atsScore >= 80 ? 'Excellent! Your resume is well-optimized.' :
+               atsScore >= 60 ? "Good, but there's room for improvement." :
                'Needs significant improvement to pass ATS filters.'}
             </p>
           </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="glass-card p-5">
+              <p className="text-sm text-zinc-400">Target Role</p>
+              <h3 className="text-xl font-bold mt-1">{targetRole}</h3>
+            </div>
+            <div className="glass-card p-5">
+              <p className="text-sm text-zinc-400">Resume Status</p>
+              <h3 className={`text-xl font-bold mt-1 ${getScoreColor(atsScore)}`}>{scoreLabel}</h3>
+            </div>
+            <div className="glass-card p-5">
+              <p className="text-sm text-zinc-400">Priority Fixes</p>
+              <h3 className="text-xl font-bold mt-1">{priorityFixes.length || 0}</h3>
+            </div>
+          </div>
+
+          {priorityFixes.length > 0 && (
+            <div className="glass-card p-6 mb-6">
+              <h3 className="text-lg font-semibold mb-4">Top Priority Fixes</h3>
+              <ol className="space-y-2 list-decimal list-inside">
+                {priorityFixes.map((fix, idx) => (
+                  <li key={idx} className="text-zinc-300">{fix}</li>
+                ))}
+              </ol>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Missing Skills */}
@@ -239,6 +279,18 @@ const ResumeAnalyzerPage = () => {
           <p className="text-zinc-400 text-lg">
             Upload your resume (PDF) and get detailed AI analysis including ATS score, missing skills, and improvement suggestions.
           </p>
+        </div>
+
+        <div className="glass-card p-5 mb-6">
+          <label className="block text-sm font-medium mb-2">Target Job Role</label>
+          <input
+            type="text"
+            value={targetRole}
+            onChange={(e) => setTargetRole(e.target.value)}
+            className="input-modern"
+            placeholder="Example: MERN Stack Developer, React Developer"
+          />
+          <p className="text-xs text-zinc-500 mt-2">Analyzer will score your resume according to this role.</p>
         </div>
 
         <div

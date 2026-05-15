@@ -12,11 +12,13 @@ import {
   FiGlobe,
   FiMonitor
 } from 'react-icons/fi';
+import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
 const SettingsPage = () => {
+  const { theme, setThemeMode } = useTheme();
   const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState('profile');
   const [loading, setLoading] = useState(false);
@@ -28,7 +30,6 @@ const SettingsPage = () => {
     confirmPassword: ''
   });
   const [preferences, setPreferences] = useState({
-    theme: localStorage.getItem('theme') || 'dark',
     notifications: true,
     language: 'en'
   });
@@ -67,24 +68,6 @@ const SettingsPage = () => {
       });
     } catch (error) {
       toast.error('Failed to update password');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const updatePreferences = async () => {
-    setLoading(true);
-    try {
-      await axios.put('/api/user/preferences', preferences);
-      localStorage.setItem('theme', preferences.theme);
-      if (preferences.theme === 'dark') {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
-      toast.success('Preferences updated');
-    } catch (error) {
-      toast.error('Failed to update preferences');
     } finally {
       setLoading(false);
     }
@@ -240,9 +223,9 @@ const SettingsPage = () => {
                       <label className="block text-sm font-medium mb-3">Theme</label>
                       <div className="flex space-x-3">
                         <button
-                          onClick={() => setPreferences({...preferences, theme: 'light'})}
+                          onClick={() => setThemeMode('light')}
                           className={`flex-1 p-4 rounded-xl border transition ${
-                            preferences.theme === 'light'
+                            theme === 'light'
                               ? 'border-purple-500 bg-purple-500/10'
                               : 'border-zinc-700 hover:border-zinc-600'
                           }`}
@@ -251,9 +234,9 @@ const SettingsPage = () => {
                           <span className="text-sm">Light</span>
                         </button>
                         <button
-                          onClick={() => setPreferences({...preferences, theme: 'dark'})}
+                          onClick={() => setThemeMode('dark')}
                           className={`flex-1 p-4 rounded-xl border transition ${
-                            preferences.theme === 'dark'
+                            theme === 'dark'
                               ? 'border-purple-500 bg-purple-500/10'
                               : 'border-zinc-700 hover:border-zinc-600'
                           }`}
@@ -282,7 +265,7 @@ const SettingsPage = () => {
                     </div>
 
                     <button
-                      onClick={updatePreferences}
+                      onClick={() => toast.success('Preferences saved!')}
                       disabled={loading}
                       className="btn-primary flex items-center"
                     >

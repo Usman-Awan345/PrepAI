@@ -123,13 +123,15 @@ const ChatPage = () => {
 
       const response = await api.post('/chat/message', {
         chatId: chatIdToUse,
-        message: userMessage
-      });
+        message: userMessage,
+        responseMode: 'fast',
+        maxTokens: 450
+      }, { timeout: 25000 });
 
       setMessages(prev => [...prev, { role: 'assistant', content: response.data.response }]);
       setCurrentChat(response.data.chat);
     } catch (error) {
-      toast.error('Failed to send message');
+      toast.error(error.code === 'ECONNABORTED' ? 'Request timed out. Please try a shorter question.' : 'Failed to send message');
       setMessages(prev => prev.slice(0, -1));
     } finally {
       setLoading(false);
@@ -355,6 +357,7 @@ const ChatPage = () => {
               className="flex justify-start"
             >
               <div className="glass border border-zinc-800 rounded-2xl p-3 md:p-4">
+                <p className="text-xs text-zinc-400 mb-2">Generating a shorter answer...</p>
                 <div className="flex space-x-1.5">
                   <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-purple-500 rounded-full animate-bounce"></div>
                   <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-pink-500 rounded-full animate-bounce delay-100"></div>
