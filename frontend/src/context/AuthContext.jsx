@@ -32,11 +32,7 @@ export const AuthProvider = ({ children }) => {
       setUser(response.data);
     } catch (error) {
       console.error('Fetch user error:', error);
-      if (error.response?.status === 401) {
-        logout();
-      } else {
-        setLoading(false);
-      }
+      logout();
     } finally {
       setLoading(false);
     }
