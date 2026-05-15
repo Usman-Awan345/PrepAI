@@ -13,14 +13,11 @@ import {
   FiClock,
   FiStar,
   FiArrowRight,
-  FiTarget,
-  FiThumbsUp,
-  FiBookOpen,
-  FiUsers
+  FiThumbsUp
 } from 'react-icons/fi';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
 import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
+import api from '../services/api';
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -39,8 +36,8 @@ const Dashboard = () => {
   const fetchDashboardData = async () => {
     try {
       const [interviewsRes, chatsRes] = await Promise.all([
-        axios.get('/api/interview'),
-        axios.get('/api/chat')
+        api.get('/interview'),
+        api.get('/chat')
       ]);
       
       const interviews = interviewsRes.data;
@@ -70,9 +67,9 @@ const Dashboard = () => {
   ];
 
   const interviewDistribution = [
-    { name: 'Technical', value: 60, color: '#8b5cf6', icon: FiCode },
-    { name: 'DSA', value: 25, color: '#ec4899', icon: FiTrendingUp },
-    { name: 'HR', value: 15, color: '#06b6d4', icon: FiUsers },
+    { name: 'Technical', value: 60, color: '#8b5cf6' },
+    { name: 'DSA', value: 25, color: '#ec4899' },
+    { name: 'HR', value: 15, color: '#06b6d4' },
   ];
 
   const quickActions = [
@@ -82,7 +79,6 @@ const Dashboard = () => {
     { icon: FiFileText, label: 'Resume Analysis', path: '/resume-analyzer', color: 'from-orange-500 to-red-500', description: 'Get insights' },
   ];
 
-  // Animated card variants
   const cardVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: (i) => ({
@@ -108,7 +104,6 @@ const Dashboard = () => {
 
   return (
     <div className="py-8 md:pb-0 px-5">
-      {/* Welcome Section with Gradient Background */}
       <div className="relative mb-8 md:mb-10 overflow-hidden rounded-2xl">
         <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 via-pink-600/20 to-purple-600/20 rounded-2xl blur-3xl"></div>
         <motion.div
@@ -136,7 +131,6 @@ const Dashboard = () => {
         </motion.div>
       </div>
 
-      {/* Stats Cards - Premium Design */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6 mb-8 md:mb-10">
         <motion.div
           custom={0}
@@ -230,7 +224,6 @@ const Dashboard = () => {
         </motion.div>
       </div>
 
-      {/* Charts Section - Premium */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 mb-8 md:mb-10">
         <motion.div
           initial={{ opacity: 0, x: -20 }}
@@ -336,7 +329,6 @@ const Dashboard = () => {
         </motion.div>
       </div>
 
-      {/* Quick Actions - Premium Cards */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -385,7 +377,6 @@ const Dashboard = () => {
         </div>
       </motion.div>
 
-      {/* Recent Interviews - Premium Section */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -475,7 +466,6 @@ const Dashboard = () => {
           )}
         </div>
 
-        {/* Pro Tip Section */}
         {stats.recentInterviews.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -498,8 +488,5 @@ const Dashboard = () => {
     </div>
   );
 };
-
-// Helper component for icons
-const FiCode = () => <FiZap />;
 
 export default Dashboard;

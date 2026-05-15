@@ -12,7 +12,7 @@ import {
   FiDownload
 } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
+import api from '../services/api';
 import toast from 'react-hot-toast';
 
 const ResumeAnalyzerPage = () => {
@@ -65,7 +65,7 @@ const ResumeAnalyzerPage = () => {
 
     setUploading(true);
     try {
-      const response = await axios.post('/api/resume/upload', formData, {
+      const response = await api.post('/resume/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       setAnalysis(response.data.analysis);

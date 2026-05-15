@@ -16,7 +16,7 @@ import {
   FiZap
 } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
+import api from '../services/api';
 import { format } from 'date-fns';
 
 const InterviewHistoryPage = () => {
@@ -34,7 +34,7 @@ const InterviewHistoryPage = () => {
 
   const fetchInterviews = async () => {
     try {
-      const response = await axios.get('/api/interview');
+      const response = await api.get('/interview');
       setInterviews(response.data);
     } catch (error) {
       console.error('Error fetching interviews:', error);
@@ -95,7 +95,6 @@ const InterviewHistoryPage = () => {
           animate={{ opacity: 1, y: 0 }}
           className="max-w-7xl mx-auto"
         >
-          {/* Header Section */}
           <div className="mb-6 md:mb-8 lg:mb-10">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
@@ -129,7 +128,6 @@ const InterviewHistoryPage = () => {
             </div>
           </div>
 
-          {/* Stats Cards - Premium Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5 lg:gap-6 mb-6 md:mb-8 lg:mb-10">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -196,7 +194,6 @@ const InterviewHistoryPage = () => {
             </motion.div>
           </div>
 
-          {/* Filters Section */}
           <div className={`${showFilters ? 'block' : 'hidden md:block'} mb-6 md:mb-8`}>
             <div className="flex flex-wrap gap-2">
               {interviewTypes.map((type, idx) => (
@@ -218,7 +215,6 @@ const InterviewHistoryPage = () => {
             </div>
           </div>
 
-          {/* Stats Summary Bar */}
           {filteredInterviews.length > 0 && (
             <div className="mb-4 md:mb-6 p-3 sm:p-4 glass rounded-xl border border-purple-500/20">
               <div className="flex flex-wrap items-center justify-between gap-3">
@@ -242,7 +238,6 @@ const InterviewHistoryPage = () => {
             </div>
           )}
 
-          {/* Interviews List */}
           {loading ? (
             <div className="space-y-3 sm:space-y-4">
               {[1, 2, 3].map((i) => (
@@ -281,7 +276,6 @@ const InterviewHistoryPage = () => {
                       onClick={() => setSelectedInterview(selectedInterview?._id === interview._id ? null : interview)}
                     >
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
-                        {/* Left Section */}
                         <div className="flex-1">
                           <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
                             <span className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium ${
@@ -309,7 +303,6 @@ const InterviewHistoryPage = () => {
                           </div>
                         </div>
 
-                        {/* Right Section - Score */}
                         <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4">
                           <div className={`px-3 sm:px-4 py-2 rounded-xl ${getScoreBgColor(interview.overallScore || 0)} border`}>
                             <div className="flex items-center gap-2">
@@ -327,7 +320,6 @@ const InterviewHistoryPage = () => {
                       </div>
                     </div>
 
-                    {/* Expanded Details */}
                     <AnimatePresence>
                       {selectedInterview?._id === interview._id && (
                         <motion.div

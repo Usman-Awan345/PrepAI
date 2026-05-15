@@ -16,7 +16,7 @@ import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
+import api from '../services/api';
 import toast from 'react-hot-toast';
 
 const ChatPage = () => {
@@ -34,12 +34,10 @@ const ChatPage = () => {
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
 
-  // Check if mobile
   useEffect(() => {
     const checkMobile = () => {
       const mobile = window.innerWidth < 768;
       setIsMobile(mobile);
-      // Desktop par sidebar open rakho, mobile par band
       if (!mobile) {
         setSidebarOpen(true);
       } else {
@@ -74,7 +72,7 @@ const ChatPage = () => {
 
   const fetchChats = async () => {
     try {
-      const response = await axios.get('/api/chat');
+      const response = await api.get('/chat');
       setChats(response.data);
     } catch (error) {
       console.error('Error fetching chats:', error);
@@ -83,7 +81,7 @@ const ChatPage = () => {
 
   const fetchChat = async (id) => {
     try {
-      const response = await axios.get(`/api/chat/${id}`);
+      const response = await api.get(`/chat/${id}`);
       setCurrentChat(response.data);
       setMessages(response.data.messages || []);
     } catch (error) {
@@ -93,7 +91,7 @@ const ChatPage = () => {
 
   const createNewChat = async () => {
     try {
-      const response = await axios.post('/api/chat', { title: 'New Conversation' });
+      const response = await api.post('/chat', { title: 'New Conversation' });
       navigate(`/chat/${response.data._id}`);
       fetchChats();
       if (isMobile) setSidebarOpen(false);
@@ -117,13 +115,13 @@ const ChatPage = () => {
     try {
       let chatIdToUse = chatId;
       if (!chatIdToUse) {
-        const newChat = await axios.post('/api/chat', { title: userMessage.slice(0, 30) });
+        const newChat = await api.post('/chat', { title: userMessage.slice(0, 30) });
         chatIdToUse = newChat.data._id;
         navigate(`/chat/${chatIdToUse}`);
         fetchChats();
       }
 
-      const response = await axios.post('/api/chat/message', {
+      const response = await api.post('/chat/message', {
         chatId: chatIdToUse,
         message: userMessage
       });
@@ -141,7 +139,7 @@ const ChatPage = () => {
   const deleteChat = async (id) => {
     if (window.confirm('Are you sure you want to delete this conversation?')) {
       try {
-        await axios.delete(`/api/chat/${id}`);
+        await api.delete(`/chat/${id}`);
         fetchChats();
         if (chatId === id) {
           navigate('/chat');
@@ -195,7 +193,6 @@ const ChatPage = () => {
     );
   };
 
-  // Chat Sidebar Component
   const ChatSidebar = () => (
     <div className="h-full glass border-r border-zinc-800 flex flex-col">
       <div className="p-3 md:p-4 border-b border-zinc-800">
@@ -249,18 +246,14 @@ const ChatPage = () => {
 
   return (
     <div className="flex h-screen bg-black overflow-hidden">
-      {/* Desktop Sidebar - Always visible when open */}
       {!isMobile && sidebarOpen && (
         <div className="w-72 flex-shrink-0 transition-all duration-300">
           <ChatSidebar />
         </div>
       )}
 
-      {/* Main Chat Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header with Hamburger Menu */}
         <div className="glass border-b border-zinc-800 px-3 md:px-6 py-3 md:py-4 flex items-center">
-          {/* Hamburger Menu Button - Always visible on ChatPage */}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="p-1.5 md:p-2 hover:bg-zinc-800 rounded-lg transition mr-2"
@@ -269,7 +262,6 @@ const ChatPage = () => {
             <FiMenu size={20} className="md:w-5 md:h-5 text-white" />
           </button>
           
-          {/* Mobile Back Button (when chat is selected) */}
           {isMobile && chatId && (
             <button
               onClick={() => navigate('/chat')}
@@ -286,11 +278,9 @@ const ChatPage = () => {
             <p className="text-[10px] md:text-xs text-zinc-500">Powered by AI</p>
           </div>
           
-          {/* Placeholder for balance */}
           <div className="w-8 md:w-10"></div>
         </div>
 
-        {/* Messages */}
         <div className="flex-1 overflow-y-auto p-3 md:p-6 space-y-4 md:space-y-6">
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center px-4">
@@ -376,7 +366,6 @@ const ChatPage = () => {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input Area */}
         <div className="border-t border-zinc-800 p-3 md:p-4 glass">
           <div className="max-w-4xl mx-auto">
             <div className="flex items-end space-x-2 md:space-x-3">
@@ -411,7 +400,6 @@ const ChatPage = () => {
         </div>
       </div>
 
-      {/* Mobile Sidebar Overlay */}
       <AnimatePresence>
         {isMobile && sidebarOpen && (
           <>

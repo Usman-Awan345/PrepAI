@@ -11,7 +11,7 @@ import {
   FiZap
 } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
+import api from '../services/api';
 import toast from 'react-hot-toast';
 
 const VoiceInterviewPage = () => {
@@ -88,7 +88,7 @@ const VoiceInterviewPage = () => {
   const startInterview = async () => {
     setLoading(true);
     try {
-      const response = await axios.post('/api/interview/start', {
+      const response = await api.post('/interview/start', {
         type: selectedType,
         mode: 'voice'
       });
@@ -147,7 +147,7 @@ const VoiceInterviewPage = () => {
     setLoading(true);
     
     try {
-      const response = await axios.post('/api/interview/answer', {
+      const response = await api.post('/interview/answer', {
         interviewId: interview._id,
         answer: userAnswer
       });

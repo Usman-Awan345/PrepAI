@@ -14,7 +14,7 @@ import {
   FiRefreshCw
 } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
+import api from '../services/api';
 import toast from 'react-hot-toast';
 
 const MockInterviewPage = () => {
@@ -42,7 +42,7 @@ const MockInterviewPage = () => {
   const startInterview = async () => {
     setLoading(true);
     try {
-      const response = await axios.post('/api/interview/start', {
+      const response = await api.post('/interview/start', {
         type: selectedType,
         mode: 'text'
       });
@@ -64,7 +64,7 @@ const MockInterviewPage = () => {
 
     setSubmitting(true);
     try {
-      const response = await axios.post('/api/interview/answer', {
+      const response = await api.post('/interview/answer', {
         interviewId: interview._id,
         answer: answer
       });
