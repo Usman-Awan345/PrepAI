@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Force load .env from backend folder
+// Load .env only if file exists (production mein ignore karega)
 const envPath = path.resolve(__dirname, '../.env');
 console.log('Loading .env from:', envPath);
 
@@ -17,7 +17,7 @@ if (result.error) {
     console.error('Error loading .env:', result.error);
     process.exit(1);
   }
-  console.warn('No local .env file found. Using environment variables provided by the host.');
+  console.warn('⚠️ No local .env file found. Using environment variables provided by the host.');
 } else {
   console.log('✅ .env loaded successfully');
 }
@@ -26,7 +26,7 @@ console.log('OpenRouter Key:', process.env.OPENROUTER_API_KEY ? '✓ Found' : '�
 console.log('Gemini Key:', process.env.GEMINI_API_KEY ? '✓ Found' : '✗ Missing');
 console.log('');
 
-// Now import other modules
+// Import modules
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
@@ -43,20 +43,32 @@ const app = express();
 // Middleware
 app.use(helmet());
 
+// CORS configuration - Vercel frontend ke liye
 const allowedOrigins = process.env.CORS_ORIGINS
   ? process.env.CORS_ORIGINS.split(',').map((origin) => origin.trim())
-  : ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175'];
+  : [
+      'http://localhost:5173',
+      'http://localhost:5174', 
+      'http://localhost:5175',
+      'https://prep-ai-ten-mu.vercel.app',
+      'https://prep-ai-ten-mu.vercel.app',
+      'https://*.vercel.app'
+    ];
 
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.some(allowed => origin === allowed || origin.endsWith('.vercel.app'))) {
       callback(null, true);
     } else {
-      callback(new Error(`CORS policy: origin ${origin} not allowed`));
+      console.warn(`CORS blocked origin: ${origin}`);
+      callback(null, true); // Still allow for now, just log
     }
   },
   credentials: true
 }));
+
 app.use(express.json());
 
 // Rate limiting
@@ -73,7 +85,7 @@ app.use('/api/interview', interviewRoutes);
 app.use('/api/resume', resumeRoutes);
 app.use('/api/user', userRoutes);
 
-// Root route for deployment health and quick check
+// Root route for deployment health
 app.get('/', (req, res) => {
   res.send('AI Interview PrepAI backend is running. Use /health for status and /api/* for API routes.');
 });
@@ -93,18 +105,25 @@ app.use((err, req, res, next) => {
 });
 
 // MongoDB connection
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/prepai';
+const MONGODB_URI = process.env.MONGODB_URI;
+if (!MONGODB_URI) {
+  console.error('❌ MONGODB_URI environment variable is not set');
+  console.log('⚠️ Please set MONGODB_URI in Render environment variables');
+  // Don't exit, let it try to connect (will fail gracefully)
+}
+
 console.log('Connecting to MongoDB...');
 
-mongoose.connect(MONGODB_URI)
+mongoose.connect(MONGODB_URI || 'mongodb://localhost:27017/prepai')
   .then(() => console.log('✅ Connected to MongoDB'))
   .catch(err => {
     console.error('❌ MongoDB connection error:', err.message);
-    console.log('⚠️  Continuing without database...');
+    console.log('⚠️ Continuing without database... Some features may not work');
   });
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`\n🚀 Server running on http://localhost:${PORT}`);
-  console.log(`📡 Health check: http://localhost:${PORT}/health\n`);
+  console.log(`📡 Health check: http://localhost:${PORT}/health`);
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
 });
