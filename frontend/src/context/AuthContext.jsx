@@ -4,6 +4,9 @@ import toast from 'react-hot-toast';
 
 const AuthContext = createContext();
 
+//  Production backend URL
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -28,11 +31,16 @@ export const AuthProvider = ({ children }) => {
 
   const fetchUser = async () => {
     try {
-      const response = await axios.get('/api/auth/me');
+      
+      const response = await axios.get(`${API_URL}/api/auth/me`);
       setUser(response.data);
     } catch (error) {
       console.error('Fetch user error:', error);
-      logout();
+      if (error.response?.status === 401) {
+        logout();
+      } else {
+        setLoading(false);
+      }
     } finally {
       setLoading(false);
     }
@@ -40,7 +48,8 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post('/api/auth/login', { email, password });
+      
+      const response = await axios.post(`${API_URL}/api/auth/login`, { email, password });
       const { token, user } = response.data;
       localStorage.setItem('token', token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -49,6 +58,7 @@ export const AuthProvider = ({ children }) => {
       toast.success('Login successful!');
       return true;
     } catch (error) {
+      console.error('Login error:', error.response?.data || error);
       toast.error(error.response?.data?.message || 'Login failed');
       return false;
     }
@@ -56,7 +66,8 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (name, email, password) => {
     try {
-      const response = await axios.post('/api/auth/register', { name, email, password });
+      
+      const response = await axios.post(`${API_URL}/api/auth/register`, { name, email, password });
       const { token, user } = response.data;
       localStorage.setItem('token', token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -65,6 +76,7 @@ export const AuthProvider = ({ children }) => {
       toast.success('Registration successful!');
       return true;
     } catch (error) {
+      console.error('Register error:', error.response?.data || error);
       toast.error(error.response?.data?.message || 'Registration failed');
       return false;
     }
